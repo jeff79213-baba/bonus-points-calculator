@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>葡眾獎金積分計算</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; touch-action: manipulation; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Microsoft JhengHei", sans-serif;
+    background: #f5f0ea;
+    color: #3d2b1a;
+    min-height: 100vh;
+    line-height: 1.6;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .header {
+    background: linear-gradient(135deg, #b5c96a, #8aa84a);
+    color: #fff;
+    padding: 36px 20px 24px;
+    text-align: center;
+  }
+  .header h1 { font-size: 24px; font-weight: 800; letter-spacing: 2px; }
+  .header p { font-size: 14px; opacity: .9; margin-top: 4px; }
+  .container { max-width: 440px; margin: 0 auto; padding: 16px; }
+
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    margin-bottom: 12px;
+  }
+  .card-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #8aa84a;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .input-group { margin-bottom: 10px; }
+  .input-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #666;
+    margin-bottom: 3px;
+  }
+  .input-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 2px solid #e0d8ce;
+    border-radius: 8px;
+    font-size: 16px;
+    font-family: inherit;
+    background: #fff;
+    color: #3d2b1a;
+    transition: border-color .2s;
+    outline: none;
+  }
+  .input-group input:focus { border-color: #8aa84a; }
+  .input-group input[type="number"] { -moz-appearance: textfield; }
+  .input-group input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .member-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0ebe3;
+  }
+  .member-row:last-child { border-bottom: none; }
+  .member-label {
+    font-size: 14px;
+    font-weight: 700;
+    color: #3d2b1a;
+    min-width: 44px;
+    flex-shrink: 0;
+  }
+  .member-row input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 2px solid #e0d8ce;
+    border-radius: 6px;
+    font-size: 15px;
+    font-family: inherit;
+    background: #fff;
+    color: #3d2b1a;
+    outline: none;
+    transition: border-color .2s;
+  }
+  .member-row input:focus { border-color: #8aa84a; }
+  .member-row input[type="number"] { -moz-appearance: textfield; }
+  .member-row input[type="number"]::-webkit-inner-spin-button { -webkit-appearance: none; }
+
+  .delete-btn {
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: #ccc;
+    cursor: pointer;
+    padding: 4px 6px;
+    transition: color .2s;
+    line-height: 1;
+    flex-shrink: 0;
+  }
+  .delete-btn:hover { color: #e85d2c; }
+
+  .add-btn {
+    display: block;
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    background: none;
+    font-size: 14px;
+    font-weight: 600;
+    color: #999;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all .2s;
+    margin-top: 4px;
+  }
+  .add-btn:hover { border-color: #8aa84a; color: #8aa84a; }
+
+  .calc-btn {
+    display: block;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #b5c96a, #8aa84a);
+    color: #fff;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    letter-spacing: 1px;
+    transition: all .2s;
+  }
+  .calc-btn:active { transform: scale(.97); opacity: .9; }
+
+  .result-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,.08);
+    margin-bottom: 12px;
+  }
+  .result-card.hidden { display: none; }
+  .result-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #8aa84a;
+    margin-bottom: 12px;
+  }
+
+  .result-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #f0ebe3;
+    font-size: 14px;
+  }
+  .result-row:last-child { border-bottom: none; }
+  .result-row .r-left { display: flex; align-items: center; gap: 8px; }
+  .result-row .r-name { font-weight: 600; color: #3d2b1a; }
+  .result-row .r-detail { font-size: 12px; color: #999; }
+  .result-row .r-bonus { font-weight: 700; color: #c73e1d; font-size: 16px; }
+  .result-total {
+    text-align: center;
+    padding-top: 12px;
+    font-size: 13px;
+    color: #888;
+  }
+
+  .footer {
+    text-align: center;
+    font-size: 12px;
+    color: #bbb;
+    padding: 8px 0 20px;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>獎金積分換算</h1>
+  <p>輸入獎金總額與各人積分，自動計算分配金額</p>
+</div>
+
+<div class="container">
+
+  <!-- 獎金總額 -->
+  <div class="card">
+    <div class="card-title">💰 獎金設定</div>
+    <div class="input-group">
+      <label for="totalBonus">獎金總額</label>
+      <input type="number" id="totalBonus" min="0" placeholder="請輸入獎金總額" inputmode="decimal">
+    </div>
+  </div>
+
+  <!-- 積分見者 -->
+  <div class="card">
+    <div class="card-title">👤 積分見者</div>
+    <div class="member-row">
+      <span class="member-label">見者</span>
+      <input type="number" id="pointsReferrer" min="0" placeholder="輸入積分" inputmode="decimal">
+    </div>
+  </div>
+
+  <!-- 一號成員 -->
+  <div class="card">
+    <div class="card-title">👥 會員積分</div>
+    <div id="memberList"></div>
+    <button class="add-btn" id="addMemberBtn">＋ 增加會員</button>
+  </div>
+
+  <!-- 計算按鈕 -->
+  <button class="calc-btn" id="calcBtn">開始計算</button>
+
+  <!-- 結果 -->
+  <div class="result-card hidden" id="resultCard">
+    <div class="result-title">📊 計算結果</div>
+    <div id="resultList"></div>
+    <div class="result-total" id="resultTotal"></div>
+  </div>
+
+  <div class="footer">葡眾獎金積分計算工具</div>
+</div>
+
+<script>
+let memberCount = 2;
+
+function getMemberValues() {
+  const values = [];
+  document.querySelectorAll('.member-points').forEach(input => {
+    values.push(input.value);
+  });
+  return values;
+}
+
+function restoreMemberValues(values) {
+  document.querySelectorAll('.member-points').forEach((input, i) => {
+    if (i < values.length) input.value = values[i];
+  });
+}
+
+function renderMembers() {
+  const values = getMemberValues();
+  const list = document.getElementById('memberList');
+  list.innerHTML = '';
+  for (let i = 1; i <= memberCount; i++) {
+    const row = document.createElement('div');
+    row.className = 'member-row';
+    const label = i === 1 ? '一號' : i === 2 ? '二號' : i === 3 ? '三號' : i + '號';
+    row.innerHTML = `
+      <span class="member-label">${label}</span>
+      <input type="number" class="member-points" data-idx="${i}" min="0" placeholder="輸入積分" inputmode="decimal">
+      ${i > 2 ? '<button class="delete-btn" data-idx="' + i + '">✕</button>' : ''}
+    `;
+    list.appendChild(row);
+  }
+  restoreMemberValues(values);
+  // Bind delete events
+  document.querySelectorAll('.delete-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+      const idx = parseInt(this.dataset.idx);
+      const vals = getMemberValues();
+      vals.splice(idx - 1, 1);
+      memberCount--;
+      renderMembers();
+      restoreMemberValues(vals);
+    });
+  });
+}
+
+document.getElementById('addMemberBtn').addEventListener('click', function() {
+  memberCount++;
+  renderMembers();
+});
+
+// Initialize
+renderMembers();
+
+document.getElementById('calcBtn').addEventListener('click', function() {
+  const totalBonus = parseFloat(document.getElementById('totalBonus').value) || 0;
+  const referrerPoints = parseFloat(document.getElementById('pointsReferrer').value) || 0;
+
+  if (totalBonus <= 0) {
+    alert('請輸入獎金總額');
+    return;
+  }
+
+  const members = [];
+  // 見者
+  members.push({ label: '見者', points: referrerPoints });
+
+  // 一號們
+  let allZero = true;
+  document.querySelectorAll('.member-points').forEach(input => {
+    const label = input.closest('.member-row').querySelector('.member-label').textContent;
+    const pts = parseFloat(input.value) || 0;
+    members.push({ label, points: pts });
+    if (pts > 0) allZero = false;
+  });
+
+  if (allZero && referrerPoints <= 0) {
+    alert('請輸入至少一個人的積分');
+    return;
+  }
+
+  const totalPoints = members.reduce((sum, m) => sum + m.points, 0);
+
+  if (totalPoints <= 0) {
+    alert('總積分需大於 0');
+    return;
+  }
+
+  // Calculate
+  const results = members.map(m => ({
+    label: m.label,
+    points: m.points,
+    ratio: m.points / totalPoints,
+    bonus: totalBonus * (m.points / totalPoints)
+  }));
+
+  // Render results
+  const list = document.getElementById('resultList');
+  list.innerHTML = '';
+  results.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'result-row';
+    row.innerHTML = `
+      <div class="r-left">
+        <span class="r-name">${r.label}</span>
+        <span class="r-detail">${r.points.toLocaleString()} 積分 · ${(r.ratio * 100).toFixed(2)}%</span>
+      </div>
+      <span class="r-bonus">$${r.bonus.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</span>
+    `;
+    list.appendChild(row);
+  });
+
+  const totalAssigned = results.reduce((s, r) => s + r.bonus, 0);
+  document.getElementById('resultTotal').textContent = `總獎金 $${totalBonus.toLocaleString()} · 已分配 $${Math.round(totalAssigned).toLocaleString()}`;
+
+  document.getElementById('resultCard').classList.remove('hidden');
+  document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+</script>
+
+</body>
+</html>
