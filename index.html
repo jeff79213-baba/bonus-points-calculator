@@ -204,15 +204,6 @@
     </div>
   </div>
 
-  <!-- 積分見者 -->
-  <div class="card">
-    <div class="card-title">👤 積分見者</div>
-    <div class="member-row">
-      <span class="member-label">見者</span>
-      <input type="number" id="pointsReferrer" min="0" placeholder="輸入積分" inputmode="decimal">
-    </div>
-  </div>
-
   <!-- 一號成員 -->
   <div class="card">
     <div class="card-title">👥 會員積分</div>
@@ -289,7 +280,6 @@ renderMembers();
 
 document.getElementById('calcBtn').addEventListener('click', function() {
   const totalBonus = parseFloat(document.getElementById('totalBonus').value) || 0;
-  const referrerPoints = parseFloat(document.getElementById('pointsReferrer').value) || 0;
 
   if (totalBonus <= 0) {
     alert('請輸入獎金總額');
@@ -297,10 +287,6 @@ document.getElementById('calcBtn').addEventListener('click', function() {
   }
 
   const members = [];
-  // 見者
-  members.push({ label: '見者', points: referrerPoints });
-
-  // 一號們
   let allZero = true;
   document.querySelectorAll('.member-points').forEach(input => {
     const label = input.closest('.member-row').querySelector('.member-label').textContent;
@@ -309,7 +295,7 @@ document.getElementById('calcBtn').addEventListener('click', function() {
     if (pts > 0) allZero = false;
   });
 
-  if (allZero && referrerPoints <= 0) {
+  if (allZero) {
     alert('請輸入至少一個人的積分');
     return;
   }
